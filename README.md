@@ -37,7 +37,7 @@ Using yarn:
  npm install trpc-shield
 ```
 
-2- Add the generator to your Prisma schema
+3- Add the generator to your Prisma schema
 
 ```prisma
 generator trpc_shield {
@@ -45,7 +45,7 @@ generator trpc_shield {
 }
 ```
 
-3- Running `npx prisma generate` for the following schema.prisma
+4- Running `npx prisma generate` for the following schema.prisma
 
 ```prisma
 model User {
@@ -103,6 +103,18 @@ export const permissions = shield({
 });
 ```
 
+5- Attach generated shield as a middleware to your top-level router
+
+```ts
+export function createProtectedRouter() {
+  return (
+    trpc
+      .router<Context>()
+      // @ts-ignore
+      .middleware(permissions)
+  );
+}
+```
 
 ## Additional Options
 
