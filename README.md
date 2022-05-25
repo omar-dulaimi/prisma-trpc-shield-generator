@@ -110,7 +110,6 @@ export function createProtectedRouter() {
   return (
     trpc
       .router<Context>()
-      // @ts-ignore
       .middleware(permissions)
   );
 }
