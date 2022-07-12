@@ -15,9 +15,20 @@ Automatically generate a [tRPC Shield](https://github.com/omar-dulaimi/trpc-shie
 
 ## Table of Contents
 
+- [Supported Prisma Versions](#supported-prisma-versions)
 - [Installation](#installing)
 - [Usage](#usage)
 - [Additional Options](#additional-options)
+
+# Supported Prisma Versions
+
+### Prisma 4
+
+- 0.0.0-rc.4 and higher
+
+### Prisma 2/3
+
+- 0.0.0-rc.3 and lower
 
 ## Installation
 
@@ -113,11 +124,7 @@ export const permissions = shield({
 
 ```ts
 export function createProtectedRouter() {
-  return (
-    trpc
-      .router<Context>()
-      .middleware(permissions)
-  );
+  return trpc.router<Context>().middleware(permissions);
 }
 ```
 
