@@ -9,16 +9,20 @@ Automatically generate a [tRPC Shield](https://github.com/omar-dulaimi/trpc-shie
 
 <p align="center">
   <a href="https://www.buymeacoffee.com/omardulaimi">
-    <img src="https://cdn.buymeacoffee.com/buttons/default-black.png" alt="Buy Me A Coffee" height="41" width="174">
+    <img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174">
   </a>
 </p>
 
 ## Table of Contents
 
+- [Prisma tRPC Shield Generator](#prisma-trpc-shield-generator)
+  - [Table of Contents](#table-of-contents)
 - [Supported Prisma Versions](#supported-prisma-versions)
-- [Installation](#installing)
+    - [Prisma 4](#prisma-4)
+    - [Prisma 2/3](#prisma-23)
+  - [Installation](#installation)
 - [Usage](#usage)
-- [Additional Options](#additional-options)
+  - [Additional Options](#additional-options)
 
 # Supported Prisma Versions
 
@@ -58,11 +62,14 @@ Using yarn:
 
 ```prisma
 generator trpc_shield {
-  provider = "prisma-trpc-shield-generator"
+  provider     = "prisma-trpc-shield-generator"
+  contextPath  = "../src/context"
 }
 ```
 
-4- Running `npx prisma generate` for the following schema.prisma
+4- Make sure you have a valid `Context` file, as specified in `contextPath` option. The official [Context](https://trpc.io/docs/context) for reference.
+
+5- Running `npx prisma generate` for the following schema.prisma
 
 ```prisma
 model User {
@@ -89,8 +96,9 @@ will generate the following shield
 
 ```ts
 import { shield, allow } from 'trpc-shield';
+import { Context } from '../../../context';
 
-export const permissions = shield({
+export const permissions = shield<Context>({
   query: {
     aggregatePost: allow,
     aggregateUser: allow,
@@ -120,25 +128,27 @@ export const permissions = shield({
 });
 ```
 
-5- Attach generated shield as a middleware to your top-level router
+5- Attach generated shield as a middleware to your top-level procedure
 
 ```ts
-export function createProtectedRouter() {
-  return trpc.router<Context>().middleware(permissions);
-}
+export const permissionsMiddleware = t.middleware(permissions);
+
+export const shieldedProcedure = t.procedure.use(permissionsMiddleware);
 ```
 
 ## Additional Options
 
-| Option   |  Description                                   | Type     |  Default      |
-| -------- | ---------------------------------------------- | -------- | ------------- |
-| `output` | Output directory for the generated tRPC Shield | `string` | `./generated` |
+| Option        |  Description                                        | Type     |  Default                  |
+| ------------- | --------------------------------------------------- | -------- | ------------------------- |
+| `output`      | Output directory for the generated tRPC Shield      | `string` | `./generated`             |
+| `contextPath` | Sets the context path used in your shield and rules | `string` | `../../../../src/context` |
 
 Use additional options in the `schema.prisma`
 
 ```prisma
 generator trpc_shield {
-  provider   = "prisma-trpc-shield-generator"
-  output     = "./shield"
+  provider     = "prisma-trpc-shield-generator"
+  output       = "./shield"
+  contextPath  = "../context"
 }
 ```

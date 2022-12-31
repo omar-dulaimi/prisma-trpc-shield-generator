@@ -10,6 +10,7 @@ datasource db {
 generator trpc_shield {
   provider = "node ./lib/generator.js"
   output   = "./generated"
+  contextPath    = "./context"
 }
 
 model User {
