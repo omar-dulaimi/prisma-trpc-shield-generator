@@ -7,7 +7,7 @@
     "prisma-trpc-shield-generator": "lib/generator.js"
   },
   "scripts": {
-    "gen-example": "tsc && npx prisma generate",
+    "generate": "tsc && npx prisma generate",
     "package:publish": "./package.sh && cd package && npm publish"
   },
   "author": {
@@ -25,18 +25,19 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^4.0.0",
-    "@prisma/generator-helper": "^4.0.0",
-    "@prisma/internals": "^4.0.0",
-    "prettier": "^2.7.1"
+    "@prisma/client": "^4.8.0",
+    "@prisma/generator-helper": "^4.8.0",
+    "@prisma/internals": "^4.8.0",
+    "prettier": "^2.8.1",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
-    "@trpc/server": "^9.25.3",
-    "@types/node": "^18.0.3",
-    "@types/prettier": "^2.6.3",
-    "prisma": "^4.0.0",
-    "trpc-shield": "^0.1.1",
-    "typescript": "^4.7.4"
+    "@trpc/server": "^10.7.0",
+    "@types/node": "^18.11.18",
+    "@types/prettier": "^2.7.2",
+    "prisma": "^4.8.0",
+    "trpc-shield": "^0.3.0",
+    "typescript": "^4.9.4"
   },
   "bugs": {
     "url": "https://github.com/omar-dulaimi/prisma-trpc-shield-generator/issues"

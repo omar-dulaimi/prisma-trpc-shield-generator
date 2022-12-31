@@ -1,8 +1,22 @@
-export const getImports = (type: 'trpc' | 'trpc-shield') => {
-  const trpcImportStatement = "import * as trpc from '@trpc/server';\n";
-  const trpcShieldImportStatement =
-    "import { shield, allow } from 'trpc-shield';\n";
-  return type === 'trpc' ? trpcImportStatement : trpcShieldImportStatement;
+import { EnvValue, GeneratorOptions } from '@prisma/generator-helper';
+import { parseEnvValue } from '@prisma/internals';
+import { Config } from './config';
+import getRelativePath from './utils/getRelativePath';
+
+export const getImports = (
+  type: 'trpc' | 'trpc-shield' | 'context',
+  newPath?: string,
+) => {
+  let statement = '';
+  if (type === 'trpc') {
+    statement = "import * as trpc from '@trpc/server';\n";
+  } else if (type === 'trpc-shield') {
+    statement = "import { shield, allow } from 'trpc-shield';\n";
+  } else if (type === 'context') {
+    statement = `import { Context } from '${newPath}';\n`;
+  }
+
+  return statement;
 };
 
 export const wrapWithObject = ({
@@ -25,7 +39,7 @@ export const wrapWithTrpcShieldCall = ({
 }: {
   shieldObjectTextWrapped: string;
 }) => {
-  let wrapped = 'shield(';
+  let wrapped = 'shield<Context>(';
   wrapped += '\n';
   wrapped += '  ' + shieldObjectTextWrapped;
   wrapped += '\n';
@@ -41,15 +55,19 @@ export const wrapWithExport = ({
   return `export const permissions = ${shieldObjectText};`;
 };
 
-export const constructShield = ({
-  queries,
-  mutations,
-  subscriptions,
-}: {
-  queries: Array<string>;
-  mutations: Array<string>;
-  subscriptions: Array<string>;
-}) => {
+export const constructShield = (
+  {
+    queries,
+    mutations,
+    subscriptions,
+  }: {
+    queries: Array<string>;
+    mutations: Array<string>;
+    subscriptions: Array<string>;
+  },
+  config: Config,
+  options: GeneratorOptions,
+) => {
   if (
     queries.length === 0 &&
     mutations.length === 0 &&
@@ -83,6 +101,12 @@ export const constructShield = ({
 
   if (rootItems.length === 0) return '';
   let shieldText = getImports('trpc-shield');
+  const outputDir = parseEnvValue(options.generator.output as EnvValue);
+
+  shieldText += getImports(
+    'context',
+    getRelativePath(outputDir, config.contextPath, options.schemaPath),
+  );
   shieldText += '\n\n';
   shieldText += wrapWithExport({
     shieldObjectText: wrapWithTrpcShieldCall({
