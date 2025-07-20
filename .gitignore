@@ -2,4 +2,4 @@ node_modules
 lib
 package
 npm-debug.log*
-prisma/generated
+prisma/generatedtests/generated/
