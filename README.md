@@ -1,77 +1,70 @@
 # Prisma tRPC Shield Generator
 
-[![npm version](https://badge.fury.io/js/prisma-trpc-shield-generator.svg)](https://badge.fury.io/js/prisma-trpc-shield-generator)
-[![npm](https://img.shields.io/npm/dt/prisma-trpc-shield-generator.svg)](https://www.npmjs.com/package/prisma-trpc-shield-generator)
-[![HitCount](https://hits.dwyl.com/omar-dulaimi/prisma-trpc-shield-generator.svg?style=flat)](http://hits.dwyl.com/omar-dulaimi/prisma-trpc-shield-generator)
-[![npm](https://img.shields.io/npm/l/prisma-trpc-shield-generator.svg)](LICENSE)
+> 🛡️ Automatically generate tRPC Shield permissions from your Prisma schema
 
-Automatically generate a [tRPC Shield](https://github.com/omar-dulaimi/trpc-shield) from your [Prisma](https://github.com/prisma/prisma) Schema. Updates every time `npx prisma generate` runs.
+[![npm version](https://badge.fury.io/js/prisma-trpc-shield-generator.svg)](https://badge.fury.io/js/prisma-trpc-shield-generator)
+[![npm downloads](https://img.shields.io/npm/dt/prisma-trpc-shield-generator.svg)](https://www.npmjs.com/package/prisma-trpc-shield-generator)
+[![CI](https://github.com/omar-dulaimi/prisma-trpc-shield-generator/workflows/CI/badge.svg)](https://github.com/omar-dulaimi/prisma-trpc-shield-generator/actions)
+[![License](https://img.shields.io/npm/l/prisma-trpc-shield-generator.svg)](LICENSE)
+
+A powerful Prisma generator that creates [tRPC Shield](https://github.com/omar-dulaimi/trpc-shield) configurations from your Prisma schema. Automatically generates type-safe permission rules for all your database operations, saving you time and reducing boilerplate code.
+
+## 💖 Support This Project
+
+If this tool helps you build better applications, please consider supporting its development:
 
 <p align="center">
-  <a href="https://www.buymeacoffee.com/omardulaimi">
-    <img src="https://cdn.buymeacoffee.com/buttons/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174">
+  <a href="https://github.com/sponsors/omar-dulaimi">
+    <img src="https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?style=for-the-badge&logo=github" alt="GitHub Sponsors" height="40">
   </a>
 </p>
 
-## Table of Contents
+Your sponsorship helps maintain and improve this project. Thank you! 🙏
 
-- [Prisma tRPC Shield Generator](#prisma-trpc-shield-generator)
-  - [Table of Contents](#table-of-contents)
-- [Supported Prisma Versions](#supported-prisma-versions)
-    - [Prisma 4](#prisma-4)
-    - [Prisma 2/3](#prisma-23)
+## 📖 Table of Contents
+
+- [Features](#-features)
+- [Quick Start](#-quick-start)
   - [Installation](#installation)
-- [Usage](#usage)
-  - [Additional Options](#additional-options)
+  - [Setup](#setup)
+- [Generated Output](#-generated-output)
+- [Configuration Options](#️-configuration-options)
+- [Advanced Usage](#-advanced-usage)
+  - [Custom Permission Rules](#custom-permission-rules)
+  - [Integration with tRPC Router](#integration-with-trpc-router)
+- [Examples](#-examples)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Related Projects](#-related-projects)
 
-# Supported Prisma Versions
+## ✨ Features
 
-### Prisma 4
+- 🚀 **Zero Configuration** - Works out of the box with sensible defaults
+- 🔄 **Auto-Generated** - Updates every time you run `prisma generate`
+- 🛡️ **Type Safe** - Full TypeScript support with proper typing
+- 🎯 **Comprehensive** - Covers all Prisma operations (queries, mutations, aggregations)
+- ⚙️ **Configurable** - Customize output directory and context path
+- 📦 **Lightweight** - Minimal dependencies and fast generation
 
-- 0.0.0-rc.4 and higher
+## 🚀 Quick Start
 
-### Prisma 2/3
-
-- 0.0.0-rc.3 and lower
-
-## Installation
-
-Using npm:
-
-```bash
- npm install prisma-trpc-shield-generator
-```
-
-Using yarn:
-
-```bash
- yarn add prisma-trpc-shield-generator
-```
-
-# Usage
-
-1- Star this repo 😉
-
-2- Install tRPC Shield
+### Installation
 
 ```bash
- npm install trpc-shield
+npm install prisma-trpc-shield-generator trpc-shield
 ```
 
-3- Add the generator to your Prisma schema
+### Setup
+
+1. Add the generator to your `schema.prisma`:
 
 ```prisma
 generator trpc_shield {
-  provider     = "prisma-trpc-shield-generator"
-  contextPath  = "../src/context"
+  provider    = "prisma-trpc-shield-generator"
+  contextPath = "../src/context"
 }
-```
 
-4- Make sure you have a valid `Context` file, as specified in `contextPath` option. The official [Context](https://trpc.io/docs/context) for reference.
-
-5- Running `npx prisma generate` for the following schema.prisma
-
-```prisma
 model User {
   id    Int     @id @default(autoincrement())
   email String  @unique
@@ -81,18 +74,32 @@ model User {
 
 model Post {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   title     String
   content   String?
-  published Boolean  @default(false)
-  viewCount Int      @default(0)
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  Int?
 }
 ```
 
-will generate the following shield
+2. Generate your shield:
+
+```bash
+npx prisma generate
+```
+
+3. Use the generated permissions:
+
+```ts
+import { permissions } from './generated/shield';
+import { t } from './trpc';
+
+export const permissionsMiddleware = t.middleware(permissions);
+export const protectedProcedure = t.procedure.use(permissionsMiddleware);
+```
+
+## 📋 Generated Output
+
+The generator creates a comprehensive shield configuration with all CRUD operations:
 
 ```ts
 import { shield, allow } from 'trpc-shield';
@@ -100,55 +107,197 @@ import { Context } from '../../../context';
 
 export const permissions = shield<Context>({
   query: {
-    aggregatePost: allow,
-    aggregateUser: allow,
-    findFirstPost: allow,
+    // Find operations
+    findUniqueUser: allow,
     findFirstUser: allow,
-    findManyPost: allow,
     findManyUser: allow,
     findUniquePost: allow,
-    findUniqueUser: allow,
-    groupByPost: allow,
+    findFirstPost: allow,
+    findManyPost: allow,
+    
+    // Aggregation operations
+    aggregateUser: allow,
+    aggregatePost: allow,
     groupByUser: allow,
+    groupByPost: allow,
   },
   mutation: {
-    createOnePost: allow,
+    // Create operations
     createOneUser: allow,
-    deleteManyPost: allow,
-    deleteManyUser: allow,
-    deleteOnePost: allow,
-    deleteOneUser: allow,
-    updateManyPost: allow,
-    updateManyUser: allow,
-    updateOnePost: allow,
+    createOnePost: allow,
+    
+    // Update operations
     updateOneUser: allow,
-    upsertOnePost: allow,
+    updateOnePost: allow,
+    updateManyUser: allow,
+    updateManyPost: allow,
+    
+    // Delete operations
+    deleteOneUser: allow,
+    deleteOnePost: allow,
+    deleteManyUser: allow,
+    deleteManyPost: allow,
+    
+    // Upsert operations
     upsertOneUser: allow,
+    upsertOnePost: allow,
   },
 });
 ```
 
-5- Attach generated shield as a middleware to your top-level procedure
+## ⚙️ Configuration Options
 
-```ts
-export const permissionsMiddleware = t.middleware(permissions);
+| Option        | Description                                          | Type     | Default                   |
+|---------------|------------------------------------------------------|----------|---------------------------|
+| `output`      | Output directory for the generated shield           | `string` | `./generated`             |
+| `contextPath` | Path to your tRPC context file (relative to output) | `string` | `../../../../src/context` |
 
-export const shieldedProcedure = t.procedure.use(permissionsMiddleware);
-```
-
-## Additional Options
-
-| Option        |  Description                                        | Type     |  Default                  |
-| ------------- | --------------------------------------------------- | -------- | ------------------------- |
-| `output`      | Output directory for the generated tRPC Shield      | `string` | `./generated`             |
-| `contextPath` | Sets the context path used in your shield and rules | `string` | `../../../../src/context` |
-
-Use additional options in the `schema.prisma`
+### Example Configuration
 
 ```prisma
 generator trpc_shield {
-  provider     = "prisma-trpc-shield-generator"
-  output       = "./shield"
-  contextPath  = "../context"
+  provider    = "prisma-trpc-shield-generator"
+  output      = "./src/shields"
+  contextPath = "../context"
 }
 ```
+
+## 🔧 Advanced Usage
+
+### Custom Permission Rules
+
+Replace the default `allow` rules with your custom logic:
+
+```ts
+import { permissions } from './generated/shield';
+import { rule, and, or } from 'trpc-shield';
+
+const isAuthenticated = rule()(async (parent, args, ctx) => {
+  return ctx.user !== null;
+});
+
+const isOwner = rule()(async (parent, args, ctx) => {
+  const post = await ctx.prisma.post.findUnique({
+    where: { id: args.where.id },
+    select: { authorId: true }
+  });
+  return post?.authorId === ctx.user?.id;
+});
+
+// Override specific permissions
+export const customPermissions = {
+  ...permissions,
+  mutation: {
+    ...permissions.mutation,
+    createOnePost: and(isAuthenticated),
+    updateOnePost: and(isAuthenticated, isOwner),
+    deleteOnePost: and(isAuthenticated, isOwner),
+  }
+};
+```
+
+### Integration with tRPC Router
+
+```ts
+import { initTRPC } from '@trpc/server';
+import { customPermissions } from './shields/permissions';
+
+const t = initTRPC.context<Context>().create();
+
+export const permissionsMiddleware = t.middleware(customPermissions);
+export const protectedProcedure = t.procedure.use(permissionsMiddleware);
+
+export const appRouter = t.router({
+  user: t.router({
+    create: protectedProcedure
+      .input(z.object({ name: z.string(), email: z.string() }))
+      .mutation(({ input, ctx }) => {
+        return ctx.prisma.user.create({ data: input });
+      }),
+  }),
+});
+```
+
+## 📚 Examples
+
+### Basic CRUD with Authentication
+
+```ts
+import { rule, and } from 'trpc-shield';
+
+const isAuthenticated = rule()(async (parent, args, ctx) => {
+  return !!ctx.user;
+});
+
+const canManagePosts = rule()(async (parent, args, ctx) => {
+  if (!ctx.user) return false;
+  
+  // Admin can manage all posts
+  if (ctx.user.role === 'ADMIN') return true;
+  
+  // Users can only manage their own posts
+  if (args.where?.authorId) {
+    return args.where.authorId === ctx.user.id;
+  }
+  
+  return false;
+});
+
+export const permissions = shield<Context>({
+  query: {
+    findManyPost: allow, // Public read access
+    findUniquePost: allow,
+    findManyUser: isAuthenticated, // Authenticated read access
+  },
+  mutation: {
+    createOnePost: isAuthenticated,
+    updateOnePost: and(isAuthenticated, canManagePosts),
+    deleteOnePost: and(isAuthenticated, canManagePosts),
+  },
+});
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**Error: Cannot find module '../context'**
+- Ensure your `contextPath` is correct relative to the output directory
+- Check that your context file exports a `Context` type
+
+**TypeScript errors in generated shield**
+- Make sure `trpc-shield` is installed and up to date
+- Verify your tRPC context is properly typed
+
+**Shield not updating after schema changes**
+- Run `npx prisma generate` after modifying your schema
+- Check that the generator is properly configured in `schema.prisma`
+
+### Supported Prisma Versions
+
+| Prisma Version | Generator Version |
+|----------------|-------------------|
+| 5.x            | Latest            |
+| 4.x            | 0.1.0+            |
+| 2.x - 3.x      | 0.0.x             |
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+## 🔗 Related Projects
+
+- [tRPC Shield](https://github.com/omar-dulaimi/trpc-shield) - The permission system this generator creates
+- [Prisma](https://github.com/prisma/prisma) - The database toolkit this integrates with
+- [tRPC](https://trpc.io) - The TypeScript RPC framework this works with
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/omar-dulaimi">Omar Dulaimi</a>
+</p>
