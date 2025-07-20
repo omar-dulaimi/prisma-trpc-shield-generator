@@ -1,0 +1,144 @@
+// Edge cases and complex scenarios
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator shield {
+  provider = "node ./lib/generator.js"
+  output   = "../generated/edge-cases/generated"
+  contextPath = "../test-context"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://test:test@localhost:5432/test"
+}
+
+// Model with all possible field types
+model AllTypes {
+  id            Int       @id @default(autoincrement())
+  string        String
+  optionalString String?
+  int           Int
+  optionalInt   Int?
+  bigint        BigInt
+  float         Float
+  decimal       Decimal
+  boolean       Boolean
+  datetime      DateTime
+  json          Json
+  jsonOptional  Json?
+  bytes         Bytes
+  stringArray   String[]
+  intArray      Int[]
+  enumField     TestEnum
+  enumOptional  TestEnum?
+  
+  @@map("all_types")
+}
+
+enum TestEnum {
+  OPTION_ONE
+  OPTION_TWO
+  OPTION_THREE
+}
+
+// Model with very long name
+model VeryLongModelNameThatTestsGeneratorLimits {
+  id                          Int    @id @default(autoincrement())
+  veryLongFieldNameThatMightCauseIssues String
+  
+  @@map("very_long_model_name")
+}
+
+// Model with reserved keywords
+model Select {
+  id     Int    @id @default(autoincrement())
+  where  String
+  from   String
+  join   String
+  order  String
+  group  String
+  having String
+  
+  @@map("select_model")
+}
+
+// Self-referencing model
+model TreeNode {
+  id       Int        @id @default(autoincrement())
+  name     String
+  parentId Int?
+  parent   TreeNode?  @relation("TreeHierarchy", fields: [parentId], references: [id])
+  children TreeNode[] @relation("TreeHierarchy")
+  
+  @@map("tree_nodes")
+}
+
+// Many-to-many relationships
+model Student {
+  id      Int       @id @default(autoincrement())
+  name    String
+  courses Course[]  @relation("StudentCourses")
+  
+  @@map("students")
+}
+
+model Course {
+  id       Int       @id @default(autoincrement())
+  name     String
+  students Student[] @relation("StudentCourses")
+  
+  @@map("courses")
+}
+
+// Model with complex constraints
+model ComplexConstraints {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  code      String
+  category  String
+  priority  Int
+  status    String
+  createdAt DateTime @default(now())
+  
+  @@unique([code, category])
+  @@unique([username, category])
+  @@index([status, priority])
+  @@index([createdAt])
+  @@map("complex_constraints")
+}
+
+// Model with no relations (isolated)
+model IsolatedModel {
+  id   Int    @id @default(autoincrement())
+  data String
+  
+  @@map("isolated_model")
+}
+
+// Model with only optional fields except ID
+model MostlyOptional {
+  id       Int     @id @default(autoincrement())
+  field1   String?
+  field2   Int?
+  field3   Boolean?
+  field4   DateTime?
+  field5   Json?
+  
+  @@map("mostly_optional")
+}
+
+// Polymorphic-like structure
+model Attachment {
+  id           Int     @id @default(autoincrement())
+  filename     String
+  filesize     Int
+  contentType  String
+  attachableId Int
+  attachableType String
+  
+  @@index([attachableId, attachableType])
+  @@map("attachments")
+}
