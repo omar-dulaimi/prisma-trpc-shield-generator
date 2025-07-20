@@ -42,7 +42,7 @@ jobs:
         cd tests
         npx prisma generate --schema=schemas/basic.prisma
         npx prisma generate --schema=schemas/edge-cases.prisma
-        npx prisma generate --schema=schemas/complex.prisma
+        npx prisma generate --schema=schemas/comprehensive.prisma
       
   package-test:
     runs-on: ubuntu-latest
