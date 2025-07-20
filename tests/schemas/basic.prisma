@@ -1,0 +1,35 @@
+// Basic test schema with fundamental models and relationships
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator shield {
+  provider    = "node ../lib/generator.js"
+  output      = "../generated/basic/generated"
+  contextPath = "../test-context"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://test:test@localhost:5432/test"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+  
+  @@map("users")
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean @default(false)
+  authorId  Int
+  author    User    @relation(fields: [authorId], references: [id])
+  
+  @@map("posts")
+}
