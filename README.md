@@ -21,6 +21,16 @@ If this tool helps you build better applications, please consider supporting its
 
 Your sponsorship helps maintain and improve this project. Thank you! 🙏
 
+## 🧪 Beta Testing - v0.2.0-beta.0
+
+**Try the latest beta with Prisma 6 & tRPC 11 support!**
+
+```bash
+npm install prisma-trpc-shield-generator@beta
+```
+
+This beta includes **major upgrades to Prisma 6.12.0+ and tRPC v11.4.3+** - bringing compatibility with the latest versions and their breaking changes. Please test in development and [report any issues](https://github.com/omar-dulaimi/prisma-trpc-shield-generator/issues). Your feedback helps us deliver a stable release!
+
 ## 📖 Table of Contents
 
 - [Features](#-features)
