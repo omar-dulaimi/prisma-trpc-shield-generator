@@ -21,15 +21,15 @@ If this tool helps you build better applications, please consider supporting its
 
 Your sponsorship helps maintain and improve this project. Thank you! 🙏
 
-## 🧪 Beta Testing - v0.2.0-beta.0
+## 🚀 Latest Release
 
-**Try the latest beta with Prisma 6 & tRPC 11 support!**
+**Now with full Prisma 6 & tRPC 11 support!**
 
 ```bash
-npm install prisma-trpc-shield-generator@beta
+npm install prisma-trpc-shield-generator
 ```
 
-This beta includes **major upgrades to Prisma 6.12.0+ and tRPC v11.4.3+** - bringing compatibility with the latest versions and their breaking changes. Please test in development and [report any issues](https://github.com/omar-dulaimi/prisma-trpc-shield-generator/issues). Your feedback helps us deliver a stable release!
+This release includes **major upgrades to the latest Prisma 6+ and tRPC v11+** - bringing compatibility with the latest versions and their breaking changes. [Report any issues](https://github.com/omar-dulaimi/prisma-trpc-shield-generator/issues) to help us continue improving!
 
 ## 📖 Table of Contents
 
@@ -283,13 +283,6 @@ export const permissions = shield<Context>({
 - Run `npx prisma generate` after modifying your schema
 - Check that the generator is properly configured in `schema.prisma`
 
-### Supported Prisma Versions
-
-| Prisma Version | Generator Version |
-|----------------|-------------------|
-| 5.x            | Latest            |
-| 4.x            | 0.1.0+            |
-| 2.x - 3.x      | 0.0.x             |
 
 ## 🤝 Contributing
 
