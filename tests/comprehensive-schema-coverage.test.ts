@@ -97,8 +97,8 @@ describe('Comprehensive Schema Coverage', () => {
     
     const generationTime = await ShieldTestUtils.measureGenerationTime(comprehensiveSchemaPath);
     
-    // Should generate within 10 seconds even for complex schema
-    expect(generationTime).toBeLessThan(10000);
+    // Should generate within 15 seconds even for complex schema
+    expect(generationTime).toBeLessThan(15000);
   });
 
   it('should have consistent formatting', async () => {

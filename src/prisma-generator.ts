@@ -17,9 +17,17 @@ export async function generate(options: GeneratorOptions) {
   await fs.mkdir(outputDir, { recursive: true });
   await removeDir(outputDir, true);
 
-  const prismaClientProvider = options.otherGenerators.find(
-    (it) => parseEnvValue(it.provider) === 'prisma-client-js',
-  );
+  const prismaClientProvider = options.otherGenerators.find((it) => {
+    const provider = parseEnvValue(it.provider);
+    return provider === 'prisma-client-js' || provider === 'prisma-client';
+  });
+
+  if (!prismaClientProvider) {
+    throw new Error(
+      'prisma-trpc-shield-generator requires a Prisma Client generator. ' +
+        'Please add either "prisma-client-js" (Prisma 5/6) or "prisma-client" (Prisma 7) to your schema.',
+    );
+  }
 
   const prismaClientDmmf = await getDMMF({
     datamodel: options.datamodel,

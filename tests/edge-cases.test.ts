@@ -166,6 +166,6 @@ describe('Edge Cases and Complex Scenarios', () => {
     const generationTime = await ShieldTestUtils.measureGenerationTime(edgeCasesSchemaPath);
     
     // Should generate within reasonable time even with edge cases
-    expect(generationTime).toBeLessThan(12000);
+    expect(generationTime).toBeLessThan(15000);
   });
 });

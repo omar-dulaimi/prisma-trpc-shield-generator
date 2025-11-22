@@ -4,3 +4,6 @@ package
 npm-debug.log*
 prisma/generated/
 tests/generated/
+
+/src/generated/prisma
+prisma-client

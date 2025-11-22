@@ -10,7 +10,7 @@ export class ShieldTestUtils {
    * Generate shield file from a test schema
    */
   static async generateShield(schemaPath: string): Promise<string> {
-    const command = `npx prisma generate --schema="${schemaPath}"`;
+    const command = `pnpm prisma generate --schema="${schemaPath}"`;
     try {
       execSync(command, { 
         stdio: 'pipe',

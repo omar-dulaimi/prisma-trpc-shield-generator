@@ -19,34 +19,39 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
-        
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
-        cache: 'npm'
+        cache: 'pnpm'
         registry-url: 'https://registry.npmjs.org'
-        
+
     - name: Install dependencies
-      run: npm ci
-      
+      run: pnpm install --frozen-lockfile
+
     - name: Build and test
       run: |
-        npm run generate
-        npx tsc --noEmit
-        
+        pnpm generate
+        pnpm tsc --noEmit
+
     - name: Configure Git
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        
+
     - name: Determine version bump
       id: version
       run: |
@@ -62,7 +67,7 @@ jobs:
             echo "type=patch" >> $GITHUB_OUTPUT
           fi
         fi
-        
+
     - name: Bump version
       id: bump
       run: |
@@ -71,22 +76,22 @@ jobs:
         NEW_VERSION=$(node -p "require('./package.json').version")
         echo "old_version=$OLD_VERSION" >> $GITHUB_OUTPUT
         echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        
+
     - name: Update package.json in package directory
       run: |
-        npm run package:publish || ./package.sh
-        
+        pnpm package:publish || ./package.sh
+
     - name: Commit version bump
       run: |
         git add package.json
         git commit -m "chore: bump version to v${{ steps.bump.outputs.new_version }} [skip ci]"
         git tag "v${{ steps.bump.outputs.new_version }}"
-        
+
     - name: Push changes
       run: |
         git push origin master
         git push origin "v${{ steps.bump.outputs.new_version }}"
-        
+
     - name: Create GitHub Release
       uses: actions/create-release@v1
       env:
@@ -96,20 +101,20 @@ jobs:
         release_name: "Release v${{ steps.bump.outputs.new_version }}"
         body: |
           ## Changes
-          
+
           See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for detailed changes.
-          
+
           **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ steps.bump.outputs.old_version }}...v${{ steps.bump.outputs.new_version }}
         draft: false
         prerelease: false
-        
+
     - name: Publish to NPM
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         cd package
-        npm publish --access public
-        
+        pnpm publish --access public --no-git-checks
+
     - name: Upload package artifact
       uses: actions/upload-artifact@v4
       with:

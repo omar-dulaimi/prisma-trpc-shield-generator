@@ -4,14 +4,13 @@ generator client {
 }
 
 generator shield {
-  provider = "node ../lib/generator.js"
-  output   = "../generated/comprehensive/generated"
+  provider    = "node ./lib/generator.js"
+  output      = "../generated/comprehensive/generated"
   contextPath = "../test-context"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://test:test@localhost:5432/test"
 }
 
 enum Role {
