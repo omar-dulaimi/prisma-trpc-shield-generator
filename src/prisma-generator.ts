@@ -29,9 +29,9 @@ export async function generate(options: GeneratorOptions) {
     );
   }
 
+  // Prisma 7.9 removed `previewFeatures` from GetDMMFOptions; passing it fails to compile.
   const prismaClientDmmf = await getDMMF({
     datamodel: options.datamodel,
-    previewFeatures: prismaClientProvider?.previewFeatures,
   });
 
   const queries: RootType = [];

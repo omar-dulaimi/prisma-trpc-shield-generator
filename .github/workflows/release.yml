@@ -18,6 +18,13 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      # Required for npm Trusted Publishing: the OIDC token is exchanged with the registry
+      # for a short-lived publish credential.
+      id-token: write
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
@@ -35,7 +42,8 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        # Trusted publishing needs npm >= 11.5.1, which ships with Node 24. Node 20 carries npm 10.
+        node-version: '24.x'
         cache: 'pnpm'
         registry-url: 'https://registry.npmjs.org'
 
@@ -110,7 +118,7 @@ jobs:
 
     - name: Publish to NPM
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # No npm token: auth is the OIDC exchange.
       run: |
         cd package
         pnpm publish --access public --no-git-checks
