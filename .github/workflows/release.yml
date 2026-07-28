@@ -39,13 +39,14 @@ jobs:
       with:
         version: 9
 
+    # Deliberately no `registry-url`: it writes an .npmrc containing an authToken placeholder, which
+    # gets in the way of the OIDC exchange in the publish step below.
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         # Trusted publishing needs npm >= 11.5.1, which ships with Node 24. Node 20 carries npm 10.
         node-version: '24.x'
         cache: 'pnpm'
-        registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -116,9 +117,11 @@ jobs:
         draft: false
         prerelease: false
 
+    # No npm token: the package is configured for Trusted Publishing with tokens disallowed, so auth is
+    # the OIDC exchange alone. `pnpm publish` shells out to the npm CLI on PATH (npm 11 from Node 24),
+    # which performs the exchange. No `env:` block here on purpose: an `env:` key with nothing under it
+    # is a workflow syntax error that stops the entire file from loading.
     - name: Publish to NPM
-      env:
-          # No npm token: auth is the OIDC exchange.
       run: |
         cd package
         pnpm publish --access public --no-git-checks
