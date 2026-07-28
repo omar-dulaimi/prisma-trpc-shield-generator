@@ -12,7 +12,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        # 24 is the Node the release job publishes from, so it has to be one of the versions CI
+        # actually exercises. 20 is end-of-life and the runners now force actions off it anyway.
+        node-version: [22.x, 24.x]
 
     steps:
     - name: Checkout code
@@ -61,21 +63,25 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        # Matches the release job, so the tarball is verified on the Node it is published from.
+        node-version: '24.x'
         cache: 'pnpm'
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
+    # Not `pnpm package:publish`: that script ends in `pnpm publish`, so this job used to attempt a
+    # real publish on every pull request, fall back to a bare `./package.sh` when the publish failed
+    # for lack of auth, and then "verify" the empty package that fallback produced.
     - name: Build and package
       run: |
         pnpm generate
-        pnpm package:publish || ./package.sh
+        ./package.sh
 
+    # Packs the tarball, installs it into an empty directory and drives the installed binary, which
+    # is the only thing here that can see a package that builds but ships no code.
     - name: Test package integrity
-      run: |
-        cd package
-        pnpm pack
+      run: pnpm test:package
 
     - name: Upload package artifact
       uses: actions/upload-artifact@v4

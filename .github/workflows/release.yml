@@ -86,11 +86,27 @@ jobs:
         echo "old_version=$OLD_VERSION" >> $GITHUB_OUTPUT
         echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-    - name: Update package.json in package directory
-      run: |
-        pnpm package:publish || ./package.sh
+    # Everything from here to the publish step is local to the runner. Nothing is pushed, tagged or
+    # announced until npm has accepted the package, so a failure past this point leaves no trace
+    # outside the run. This is the ordering semantic-release uses, and reversing it is what produced
+    # a v1.0.2 tag and GitHub Release with no v1.0.2 on npm.
+    - name: Build the publishable package
+      run: ./package.sh
 
-    - name: Commit version bump
+    - name: Verify the tarball a consumer would install
+      run: pnpm test:package
+
+    # No npm token: the package is configured for Trusted Publishing with tokens disallowed, so auth is
+    # the OIDC exchange alone. `pnpm publish` shells out to the npm CLI on PATH (npm 11 from Node 24),
+    # which performs the exchange. No `env:` block here on purpose: an `env:` key with nothing under it
+    # is a workflow syntax error that stops the entire file from loading.
+    - name: Publish to NPM
+      run: |
+        cd package
+        pnpm publish --access public --no-git-checks
+
+    # npm has the version now, so the tag and the release can point at something installable.
+    - name: Commit and tag the published version
       run: |
         git add package.json
         git commit -m "chore: bump version to v${{ steps.bump.outputs.new_version }} [skip ci]"
@@ -102,29 +118,16 @@ jobs:
         git push origin "v${{ steps.bump.outputs.new_version }}"
 
     - name: Create GitHub Release
-      uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: "v${{ steps.bump.outputs.new_version }}"
-        release_name: "Release v${{ steps.bump.outputs.new_version }}"
-        body: |
-          ## Changes
-
-          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for detailed changes.
-
-          **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ steps.bump.outputs.old_version }}...v${{ steps.bump.outputs.new_version }}
-        draft: false
-        prerelease: false
-
-    # No npm token: the package is configured for Trusted Publishing with tokens disallowed, so auth is
-    # the OIDC exchange alone. `pnpm publish` shells out to the npm CLI on PATH (npm 11 from Node 24),
-    # which performs the exchange. No `env:` block here on purpose: an `env:` key with nothing under it
-    # is a workflow syntax error that stops the entire file from loading.
-    - name: Publish to NPM
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        cd package
-        pnpm publish --access public --no-git-checks
+        gh release create "v${{ steps.bump.outputs.new_version }}" \
+          --title "Release v${{ steps.bump.outputs.new_version }}" \
+          --notes "## Changes
+
+        See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for detailed changes.
+
+        **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ steps.bump.outputs.old_version }}...v${{ steps.bump.outputs.new_version }}"
 
     - name: Upload package artifact
       uses: actions/upload-artifact@v4

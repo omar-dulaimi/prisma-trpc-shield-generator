@@ -9,7 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run package:publish` - Run package.sh script and publish to npm from package/ directory
 
 ### Testing
-This project does not include test scripts. Testing should be done through integration with actual Prisma schemas.
+- `npm test` - Run the vitest suite in `tests/`, which drives the generator against real Prisma schemas
+- `npm run test:type-check` - Type-check without emitting
+- `npm run test:package` - Build, pack, install the tarball into an empty directory and drive the
+  installed binary. This is the only check that can see a package that builds but ships no code, so
+  run it before anything that publishes.
 
 ## Architecture Overview
 
@@ -20,7 +24,7 @@ This is a Prisma generator that creates tRPC Shield configurations from Prisma s
 **Generator Entry Point** (`src/index.ts`):
 - Uses `@prisma/generator-helper` to register the generator
 - Defines manifest with default output directory `./generated`
-- Requires `prisma-client-js` generator to be present
+- Requires a Prisma Client generator in the schema: `prisma-client` (Prisma 7) or `prisma-client-js` (Prisma 5/6)
 
 **Main Generator Logic** (`src/prisma-generator.ts`):
 - Parses Prisma DMMF (Data Model Meta Format) to extract model operations

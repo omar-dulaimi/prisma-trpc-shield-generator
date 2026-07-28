@@ -23,13 +23,22 @@ Your sponsorship helps maintain and improve this project. Thank you! 🙏
 
 ## 🚀 Latest Release
 
-**Now with full Prisma 6 & tRPC 11 support!**
+**Now with full Prisma 7 & tRPC 11 support!**
 
 ```bash
 npm install prisma-trpc-shield-generator
 ```
 
-This release includes **major upgrades to the latest Prisma 6+ and tRPC v11+** - bringing compatibility with the latest versions and their breaking changes. [Report any issues](https://github.com/omar-dulaimi/prisma-trpc-shield-generator/issues) to help us continue improving!
+This release builds on **Prisma 7 and tRPC v11**. The generator depends on `@prisma/generator-helper` and `@prisma/internals` at `^7.0.0`, and the shield it emits is typed against `trpc-shield` v2, which itself requires `@trpc/server` v11. [Report any issues](https://github.com/omar-dulaimi/prisma-trpc-shield-generator/issues) to help us continue improving!
+
+### Requirements
+
+| Package | Version |
+|---------|---------|
+| Prisma | 7.x |
+| `trpc-shield` | 2.x |
+| `@trpc/server` | 11.x |
+| Node.js | 22 and 24 are the versions CI runs against |
 
 ## 📖 Table of Contents
 
@@ -70,9 +79,20 @@ npm install prisma-trpc-shield-generator trpc-shield
 1. Add the generator to your `schema.prisma`:
 
 ```prisma
+// The generator reads your models through a Prisma Client generator, so your schema needs one.
+// On Prisma 7 that is `prisma-client`; on Prisma 5 and 6 it was `prisma-client-js`.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
 generator trpc_shield {
   provider    = "prisma-trpc-shield-generator"
   contextPath = "../src/context"
+}
+
+datasource db {
+  provider = "sqlite"
 }
 
 model User {
@@ -157,10 +177,14 @@ export const permissions = shield<Context>({
 
 ## ⚙️ Configuration Options
 
-| Option        | Description                                          | Type     | Default                   |
-|---------------|------------------------------------------------------|----------|---------------------------|
-| `output`      | Output directory for the generated shield           | `string` | `./generated`             |
-| `contextPath` | Path to your tRPC context file (relative to output) | `string` | `../../../../src/context` |
+| Option        | Description                                                            | Type     | Default                   |
+|---------------|------------------------------------------------------------------------|----------|---------------------------|
+| `output`      | Output directory for the generated shield                              | `string` | `./generated`             |
+| `contextPath` | Path to your tRPC context file, **relative to the directory holding your `schema.prisma`** | `string` | `../../../../src/context` |
+
+`contextPath` is resolved against the schema's directory, not against `output`. The generator then
+rewrites it as a path relative to `output` in the emitted import, so moving `output` does not
+require changing `contextPath`.
 
 ### Example Configuration
 

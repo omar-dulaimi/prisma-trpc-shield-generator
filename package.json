@@ -15,7 +15,8 @@
     "test:ci": "vitest run --coverage",
     "test:basic": "vitest run tests/basic-shield-generation.test.ts",
     "test:comprehensive": "vitest run tests/comprehensive-schema-coverage.test.ts",
-    "test:type-check": "tsc --noEmit"
+    "test:type-check": "tsc --noEmit",
+    "test:package": "node scripts/check-package.mjs"
   },
   "author": {
     "name": "Omar Dulaimi",
