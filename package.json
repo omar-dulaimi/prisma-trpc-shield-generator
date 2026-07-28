@@ -1,14 +1,17 @@
 {
   "name": "prisma-trpc-shield-generator",
   "version": "1.0.2",
-  "description": "Prisma +2 generator to emit a tRPC shield from your Prisma schema",
-  "repository": "https://github.com/omar-dulaimi/prisma-trpc-shield-generator",
+  "description": "Prisma 7 generator that emits a tRPC Shield from your Prisma schema",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omar-dulaimi/prisma-trpc-shield-generator.git"
+  },
   "bin": {
     "prisma-trpc-shield-generator": "lib/generator.js"
   },
   "scripts": {
     "generate": "tsc && pnpm prisma generate",
-    "package:publish": "./package.sh && cd package && pnpm publish",
+    "package:build": "./package.sh",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest run --coverage",
@@ -33,13 +36,13 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^7.0.0",
     "@prisma/generator-helper": "^7.0.0",
     "@prisma/internals": "^7.0.0",
     "prettier": "^3.6.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@prisma/client": "^7.0.0",
     "@trpc/server": "^11.7.1",
     "@types/node": "^24.10.1",
     "@vitest/coverage-v8": "^4.0.13",

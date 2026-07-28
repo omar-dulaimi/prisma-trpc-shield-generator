@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Build and Development
 - `npm run generate` - Compile TypeScript to lib/ directory and run Prisma generate
-- `npm run package:publish` - Run package.sh script and publish to npm from package/ directory
+- `npm run package:build` - Run package.sh to assemble the publishable `package/` directory. This
+  only builds. Publishing happens in `.github/workflows/release.yml` and nowhere else, so that a
+  release is always a deliberate act against a verified tarball rather than a side effect of
+  running a build script locally.
 
 ### Testing
 - `npm test` - Run the vitest suite in `tests/`, which drives the generator against real Prisma schemas

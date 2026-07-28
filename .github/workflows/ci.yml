@@ -37,12 +37,13 @@ jobs:
     - name: Build project
       run: pnpm generate
 
+    # There is deliberately no lint step. There is no linter in this repo, and the step that used
+    # to sit here ran `pnpm lint || echo "Linting skipped"` under `continue-on-error`. With no lint
+    # script defined, `pnpm lint` exits 254, the `||` swallowed it and `continue-on-error` swallowed
+    # anything the `||` missed, so the step reported success on every run it had ever made. It
+    # advertised coverage the repo did not have. `tsc --noEmit` above is the real static gate.
     - name: Run type checking
       run: pnpm tsc --noEmit
-
-    - name: Run linting
-      run: pnpm lint || echo "Linting skipped - no lint script"
-      continue-on-error: true
 
     - name: Run tests
       run: pnpm test
@@ -70,9 +71,10 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
-    # Not `pnpm package:publish`: that script ends in `pnpm publish`, so this job used to attempt a
-    # real publish on every pull request, fall back to a bare `./package.sh` when the publish failed
-    # for lack of auth, and then "verify" the empty package that fallback produced.
+    # This used to run `pnpm package:publish`, a script that ended in `pnpm publish`, so the job
+    # attempted a real publish on every pull request, fell back to a bare `./package.sh` when the
+    # publish failed for lack of auth, and then "verified" the empty package that fallback produced.
+    # That script is gone: no script in this repo can publish, only release.yml can.
     - name: Build and package
       run: |
         pnpm generate
