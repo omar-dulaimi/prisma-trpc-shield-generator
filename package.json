@@ -1,6 +1,6 @@
 {
   "name": "prisma-trpc-shield-generator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Prisma 7 generator that emits a tRPC Shield from your Prisma schema",
   "repository": {
     "type": "git",
